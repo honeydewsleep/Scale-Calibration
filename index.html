@@ -2,209 +2,407 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Industrial Platform Scale Calibration Guide</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Scale Calibration Guide — Honeydew Sleep</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f0f23">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-deep: #0f0f23;
+            --bg-card: #16162a;
+            --cyan: #00BCD4;
+            --cyan-light: #00E5FF;
+            --cyan-glow: rgba(0,188,212,0.25);
+            --red-led: #FF3333;
+            --orange: #FF9800;
+            --text: #e0e0e0;
+            --text-muted: #888;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
-            color: #e0e0e0;
+            background: var(--bg-deep);
+            color: var(--text);
             min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            display: flex; flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* ===== PROGRESS BAR ===== */
         .progress-bar {
-            position: fixed; top: 0; left: 0; height: 4px; z-index: 100;
-            background: linear-gradient(90deg, #00BCD4, #00E5FF);
-            transition: width 0.4s ease;
+            position: fixed; top: 0; left: 0; height: 3px; z-index: 200;
+            background: linear-gradient(90deg, var(--cyan), var(--cyan-light));
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 12px var(--cyan-glow);
         }
 
         /* ===== HEADER ===== */
         .header {
             text-align: center;
-            padding: 2rem 1rem 1rem;
-            border-bottom: 1px solid rgba(0,188,212,0.2);
+            padding: 1.5rem 1rem 0.8rem;
+            border-bottom: 1px solid rgba(0,188,212,0.15);
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(15,15,35,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
         .header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #00BCD4, #00E5FF);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--cyan), var(--cyan-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .header p { color: #888; font-size: 0.9rem; margin-top: 0.3rem; }
+        .header p { color: var(--text-muted); font-size: 0.75rem; margin-top: 0.15rem; }
 
         /* ===== STEP NAV DOTS ===== */
         .step-nav {
-            display: flex; justify-content: center; gap: 0.5rem;
-            padding: 1rem; flex-wrap: wrap;
+            display: flex; justify-content: center; gap: 0.4rem;
+            padding: 0.7rem 0.5rem; flex-wrap: wrap;
+            position: sticky; top: 60px; z-index: 99;
+            background: rgba(15,15,35,0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
         .step-dot {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15);
+            width: 30px; height: 30px; border-radius: 50%;
+            background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.12);
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem; font-weight: 600; cursor: pointer;
-            transition: all 0.3s ease;
+            font-size: 0.65rem; font-weight: 600; cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-tap-highlight-color: transparent;
         }
-        .step-dot:hover { border-color: #00BCD4; background: rgba(0,188,212,0.1); }
+        .step-dot:hover { border-color: var(--cyan); background: rgba(0,188,212,0.1); }
         .step-dot.active {
-            background: #00BCD4; border-color: #00BCD4; color: #0f0f23;
+            background: var(--cyan); border-color: var(--cyan); color: var(--bg-deep);
+            transform: scale(1.15);
+            box-shadow: 0 0 14px var(--cyan-glow);
         }
         .step-dot.completed {
-            background: rgba(0,188,212,0.25); border-color: #00BCD4; color: #00E5FF;
+            background: rgba(0,188,212,0.2); border-color: var(--cyan); color: var(--cyan-light);
         }
 
         /* ===== MAIN CONTENT ===== */
         .step-container {
-            max-width: 900px; margin: 0 auto; padding: 1rem;
-            min-height: 60vh;
+            flex: 1;
+            max-width: 900px; width: 100%;
+            margin: 0 auto; padding: 1rem;
         }
 
-        .step-card {
-            display: none; animation: fadeSlideIn 0.4s ease;
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
+        @keyframes fadeSlideLeft {
+            from { opacity: 0; transform: translateX(-25px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeSlideRight {
+            from { opacity: 0; transform: translateX(25px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes popIn {
+            0%   { opacity: 0; transform: scale(0.5); }
+            70%  { transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes shimmer {
+            0%   { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes ledFlicker {
+            0%, 100% { opacity: 1; }
+            5%       { opacity: 0.7; }
+            10%      { opacity: 1; }
+            92%      { opacity: 1; }
+            94%      { opacity: 0.8; }
+            96%      { opacity: 1; }
+        }
+        @keyframes ledPulse {
+            0%, 100% { text-shadow: 0 0 8px rgba(255,51,51,0.6), 0 0 20px rgba(255,51,51,0.3); }
+            50%      { text-shadow: 0 0 14px rgba(255,51,51,0.9), 0 0 35px rgba(255,51,51,0.5), 0 0 50px rgba(255,51,51,0.2); }
+        }
+        @keyframes checkPop {
+            0%   { transform: scale(0) rotate(-45deg); opacity: 0; }
+            60%  { transform: scale(1.3) rotate(0deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        @keyframes troubleSlide {
+            from { opacity: 0; transform: translateY(15px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .step-card { display: none; }
         .step-card.active { display: block; }
 
-        @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* Animated children when step renders */
+        .step-card.active .step-badge   { animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        .step-card.active .step-title   { animation: fadeSlideLeft 0.5s ease both 0.1s; }
+        .step-card.active .step-image-wrap { animation: scaleIn 0.6s ease both 0.15s; }
+        .step-card.active .step-text    { animation: fadeSlideRight 0.5s ease both 0.2s; }
+        .step-card.active .led-display  { animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both 0.3s; }
+        .step-card.active .tip-box      { animation: fadeSlideUp 0.4s ease both 0.4s; }
+        .step-card.active .warning-box  { animation: fadeSlideUp 0.4s ease both 0.4s; }
+        .step-card.active .checklist li { animation: fadeSlideUp 0.35s ease both; }
+        .step-card.active .checklist li:nth-child(1) { animation-delay: 0.2s; }
+        .step-card.active .checklist li:nth-child(2) { animation-delay: 0.28s; }
+        .step-card.active .checklist li:nth-child(3) { animation-delay: 0.36s; }
+        .step-card.active .checklist li:nth-child(4) { animation-delay: 0.44s; }
+        .step-card.active .checklist li:nth-child(5) { animation-delay: 0.52s; }
+        .step-card.active .checklist li:nth-child(6) { animation-delay: 0.60s; }
+        .step-card.active .troubleshoot-item { animation: troubleSlide 0.4s ease both; }
+        .step-card.active .troubleshoot-item:nth-child(1) { animation-delay: 0.1s; }
+        .step-card.active .troubleshoot-item:nth-child(2) { animation-delay: 0.18s; }
+        .step-card.active .troubleshoot-item:nth-child(3) { animation-delay: 0.26s; }
+        .step-card.active .troubleshoot-item:nth-child(4) { animation-delay: 0.34s; }
+        .step-card.active .troubleshoot-item:nth-child(5) { animation-delay: 0.42s; }
+        .step-card.active .troubleshoot-item:nth-child(6) { animation-delay: 0.50s; }
 
         /* Step number badge */
         .step-badge {
             display: inline-flex; align-items: center; gap: 0.5rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
         }
         .step-number {
-            background: #00BCD4; color: #0f0f23;
-            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--cyan); color: var(--bg-deep);
+            width: 40px; height: 40px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; font-weight: 700;
+            font-size: 1.1rem; font-weight: 800;
+            box-shadow: 0 0 20px var(--cyan-glow);
         }
-        .step-label { color: #00BCD4; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+        .step-label {
+            color: var(--cyan); font-size: 0.7rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.12em;
+        }
 
         .step-title {
-            font-size: 1.8rem; font-weight: 700; color: #fff;
-            margin-bottom: 1.2rem;
+            font-size: 1.6rem; font-weight: 800; color: #fff;
+            margin-bottom: 1rem; letter-spacing: -0.02em;
+            line-height: 1.2;
         }
 
-        /* Layout: image + text side by side on desktop */
+        /* Layout: stacks on mobile, side-by-side on desktop */
         .step-content {
             display: flex; gap: 1.5rem; align-items: flex-start;
-            flex-wrap: wrap;
         }
         .step-image-wrap {
-            flex: 0 0 340px; max-width: 100%;
+            flex: 0 0 300px; max-width: 300px;
         }
         .step-image-wrap img {
             width: 100%; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            /* KEY: object-fit ensures images display naturally without stretching */
+            border: 1px solid rgba(255,255,255,0.08);
             object-fit: contain;
             background: #111;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
-        .step-text {
-            flex: 1; min-width: 250px;
-        }
+        .step-text { flex: 1; min-width: 0; }
         .step-text p {
-            font-size: 1rem; line-height: 1.7; color: #ccc; margin-bottom: 1rem;
+            font-size: 0.95rem; line-height: 1.7; color: #ccc; margin-bottom: 0.8rem;
         }
 
         /* ===== LED DISPLAY ===== */
         .led-display {
-            background: #111; border: 2px solid #333; border-radius: 8px;
-            padding: 0.6rem 1.2rem; display: inline-block;
-            margin: 0.8rem 0;
+            background: linear-gradient(145deg, #0a0a0a, #181818);
+            border: 2px solid #333; border-radius: 10px;
+            padding: 0.5rem 1rem; display: inline-block;
+            margin: 0.6rem 0;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), 0 0 20px rgba(255,51,51,0.08);
+            animation: ledFlicker 8s linear infinite;
         }
         .led-text {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1.6rem; font-weight: 600;
-            color: #FF3333;
+            font-size: 1.5rem; font-weight: 600;
+            color: var(--red-led);
             text-shadow: 0 0 8px rgba(255,51,51,0.6), 0 0 20px rgba(255,51,51,0.3);
             letter-spacing: 0.15em;
-            animation: ledPulse 2s ease-in-out infinite;
-        }
-        @keyframes ledPulse {
-            0%, 100% { text-shadow: 0 0 8px rgba(255,51,51,0.6), 0 0 20px rgba(255,51,51,0.3); }
-            50% { text-shadow: 0 0 12px rgba(255,51,51,0.8), 0 0 30px rgba(255,51,51,0.5); }
+            animation: ledPulse 2.5s ease-in-out infinite;
         }
 
         /* ===== TIP BOX ===== */
         .tip-box {
-            background: rgba(0,188,212,0.08);
-            border-left: 3px solid #00BCD4;
-            border-radius: 0 8px 8px 0;
-            padding: 0.8rem 1rem; margin-top: 0.5rem;
-            font-size: 0.9rem; color: #aaa;
+            background: rgba(0,188,212,0.06);
+            border-left: 3px solid var(--cyan);
+            border-radius: 0 10px 10px 0;
+            padding: 0.75rem 1rem; margin-top: 0.8rem;
+            font-size: 0.85rem; color: #aaa; line-height: 1.6;
         }
-        .tip-box strong { color: #00BCD4; }
+        .tip-box strong { color: var(--cyan); }
 
         /* ===== WARNING BOX ===== */
         .warning-box {
-            background: rgba(255,152,0,0.08);
-            border-left: 3px solid #FF9800;
-            border-radius: 0 8px 8px 0;
-            padding: 0.8rem 1rem; margin-top: 0.5rem;
-            font-size: 0.9rem; color: #aaa;
+            background: rgba(255,152,0,0.06);
+            border-left: 3px solid var(--orange);
+            border-radius: 0 10px 10px 0;
+            padding: 0.75rem 1rem; margin-top: 0.8rem;
+            font-size: 0.85rem; color: #aaa; line-height: 1.6;
         }
-        .warning-box strong { color: #FF9800; }
+        .warning-box strong { color: var(--orange); }
 
         /* ===== NAV BUTTONS ===== */
+        .nav-footer {
+            position: sticky; bottom: 0; z-index: 100;
+            background: rgba(15,15,35,0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-bottom: var(--safe-bottom);
+        }
         .nav-buttons {
             display: flex; justify-content: space-between; align-items: center;
-            max-width: 900px; margin: 2rem auto; padding: 0 1rem 2rem;
+            max-width: 900px; margin: 0 auto; padding: 0.8rem 1rem;
         }
         .nav-btn {
-            background: rgba(0,188,212,0.15); border: 1px solid rgba(0,188,212,0.3);
-            color: #00BCD4; padding: 0.7rem 1.5rem; border-radius: 8px;
-            font-size: 0.95rem; font-weight: 600; cursor: pointer;
-            transition: all 0.3s ease;
+            background: rgba(0,188,212,0.12); border: 1px solid rgba(0,188,212,0.25);
+            color: var(--cyan); padding: 0.65rem 1.4rem; border-radius: 10px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-tap-highlight-color: transparent;
+            min-width: 100px; min-height: 44px; /* touch-friendly */
         }
-        .nav-btn:hover { background: #00BCD4; color: #0f0f23; }
-        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-        .nav-btn:disabled:hover { background: rgba(0,188,212,0.15); color: #00BCD4; }
+        .nav-btn:hover { background: var(--cyan); color: var(--bg-deep); transform: scale(1.03); }
+        .nav-btn:active { transform: scale(0.97); }
+        .nav-btn:disabled { opacity: 0.25; cursor: not-allowed; pointer-events: none; }
 
-        .step-counter { color: #666; font-size: 0.85rem; }
+        .step-counter { color: #555; font-size: 0.8rem; font-weight: 600; }
 
-        /* ===== CHECKLIST (for intro step) ===== */
+        /* ===== CHECKLIST ===== */
         .checklist { list-style: none; padding: 0; }
         .checklist li {
-            padding: 0.5rem 0; padding-left: 1.8rem; position: relative;
-            font-size: 0.95rem; color: #ccc;
+            padding: 0.55rem 0; padding-left: 2rem; position: relative;
+            font-size: 0.9rem; color: #ccc;
         }
         .checklist li::before {
-            content: "\2713"; position: absolute; left: 0;
-            color: #00BCD4; font-weight: 700;
+            content: "\2713"; position: absolute; left: 0; top: 0.55rem;
+            color: var(--cyan); font-weight: 800; font-size: 1rem;
         }
 
         /* ===== TROUBLESHOOTING ===== */
         .troubleshoot-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem; margin-top: 1rem;
+            display: grid; grid-template-columns: 1fr;
+            gap: 0.8rem; margin-top: 1rem;
         }
         .troubleshoot-item {
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 10px; padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px; padding: 1rem;
+            transition: border-color 0.3s ease, background 0.3s ease;
         }
-        .troubleshoot-item h4 { color: #FF9800; font-size: 0.9rem; margin-bottom: 0.4rem; }
-        .troubleshoot-item p { font-size: 0.85rem; color: #999; line-height: 1.5; }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 700px) {
-            .step-image-wrap { flex: 0 0 100%; }
-            .step-title { font-size: 1.4rem; }
-            .step-content { flex-direction: column; }
+        .troubleshoot-item:hover {
+            border-color: rgba(255,152,0,0.3);
+            background: rgba(255,152,0,0.04);
         }
+        .troubleshoot-item h4 { color: var(--orange); font-size: 0.85rem; margin-bottom: 0.3rem; }
+        .troubleshoot-item p { font-size: 0.82rem; color: #999; line-height: 1.55; }
 
-        /* ===== KEYBOARD HINT ===== */
+        /* ===== SWIPE INDICATOR ===== */
+        .swipe-hint {
+            text-align: center; padding: 0.4rem; color: #333; font-size: 0.7rem;
+            display: none;
+        }
         .keyboard-hint {
-            text-align: center; padding: 0.5rem; color: #444; font-size: 0.75rem;
+            text-align: center; padding: 0.3rem; color: #333; font-size: 0.7rem;
         }
         kbd {
-            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 4px; padding: 0.1rem 0.4rem; font-size: 0.7rem;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px; padding: 0.08rem 0.35rem; font-size: 0.65rem;
+        }
+
+        /* ===== AUTOPLAY BAR ===== */
+        .autoplay-bar {
+            display: flex; align-items: center; justify-content: center;
+            gap: 0.6rem; padding: 0.5rem 0;
+        }
+        .autoplay-toggle {
+            background: none; border: 1px solid rgba(255,255,255,0.15);
+            color: #666; padding: 0.3rem 0.8rem; border-radius: 20px;
+            font-size: 0.7rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .autoplay-toggle:hover { border-color: var(--cyan); color: var(--cyan); }
+        .autoplay-toggle.active {
+            background: rgba(0,188,212,0.15); border-color: var(--cyan); color: var(--cyan);
+        }
+        .autoplay-timer {
+            font-size: 0.65rem; color: #444; min-width: 30px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ================================================================
+           MOBILE OPTIMIZATIONS (< 768px)
+           ================================================================ */
+        @media (max-width: 768px) {
+            .header { padding: 1rem 0.8rem 0.6rem; }
+            .header h1 { font-size: 1.1rem; }
+            .step-nav { padding: 0.5rem 0.4rem; gap: 0.3rem; top: 52px; }
+            .step-dot { width: 28px; height: 28px; font-size: 0.6rem; }
+
+            .step-container { padding: 0.8rem; }
+
+            .step-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .step-image-wrap {
+                flex: none; max-width: 100%; width: 100%;
+            }
+            .step-image-wrap img {
+                max-height: 45vh;
+                width: 100%;
+                object-fit: contain;
+                border-radius: 10px;
+            }
+            .step-text { min-width: 0; }
+            .step-title { font-size: 1.3rem; margin-bottom: 0.8rem; }
+            .step-text p { font-size: 0.88rem; margin-bottom: 0.7rem; }
+
+            .led-display { padding: 0.4rem 0.9rem; }
+            .led-text { font-size: 1.3rem; }
+
+            .tip-box, .warning-box { font-size: 0.82rem; padding: 0.65rem 0.8rem; }
+
+            .nav-buttons { padding: 0.6rem 0.8rem; }
+            .nav-btn { padding: 0.6rem 1rem; font-size: 0.85rem; min-width: 90px; }
+
+            .troubleshoot-grid { grid-template-columns: 1fr; gap: 0.6rem; }
+            .troubleshoot-item { padding: 0.8rem; }
+
+            .keyboard-hint { display: none; }
+            .swipe-hint { display: block; }
+        }
+
+        /* Very small phones */
+        @media (max-width: 380px) {
+            .header h1 { font-size: 1rem; }
+            .step-dot { width: 25px; height: 25px; font-size: 0.55rem; }
+            .step-title { font-size: 1.15rem; }
+            .step-number { width: 34px; height: 34px; font-size: 0.95rem; }
+        }
+
+        /* Landscape phone */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .step-content { flex-direction: row; }
+            .step-image-wrap { flex: 0 0 35%; max-width: 35%; }
+            .step-image-wrap img { max-height: 40vh; }
+            .header { padding: 0.5rem; }
+            .header h1 { font-size: 1rem; }
+            .step-nav { padding: 0.3rem; top: 40px; }
+        }
+
+        /* Desktop 2-column troubleshooting */
+        @media (min-width: 769px) {
+            .troubleshoot-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -221,14 +419,20 @@
 
 <div class="step-container" id="stepContainer"></div>
 
-<div class="nav-buttons">
-    <button class="nav-btn" id="prevBtn" onclick="prevStep()">&larr; Previous</button>
-    <span class="step-counter" id="stepCounter"></span>
-    <button class="nav-btn" id="nextBtn" onclick="nextStep()">Next &rarr;</button>
-</div>
-
-<div class="keyboard-hint">
-    Navigate: <kbd>&larr;</kbd> <kbd>&rarr;</kbd> arrow keys
+<div class="nav-footer">
+    <div class="autoplay-bar">
+        <button class="autoplay-toggle" id="autoplayBtn" onclick="toggleAutoplay()">Autoplay</button>
+        <span class="autoplay-timer" id="autoplayTimer"></span>
+    </div>
+    <div class="nav-buttons">
+        <button class="nav-btn" id="prevBtn" onclick="prevStep()">&larr; Back</button>
+        <span class="step-counter" id="stepCounter"></span>
+        <button class="nav-btn" id="nextBtn" onclick="nextStep()">Next &rarr;</button>
+    </div>
+    <div class="swipe-hint">Swipe left/right to navigate</div>
+    <div class="keyboard-hint">
+        Navigate: <kbd>&larr;</kbd> <kbd>&rarr;</kbd> arrow keys
+    </div>
 </div>
 
 <script>
@@ -263,10 +467,10 @@ const STEPS = [
             "Industrial platform scale (powered off)",
             "Known calibration weights (certified/verified)",
             "Clear, level workspace",
-            "15-20 minutes of uninterrupted time",
+            "15\u201320 minutes of uninterrupted time",
             "Stable, vibration-free environment"
         ],
-        tip: "Allow the scale to warm up for 5-10 minutes after powering on before calibrating for best accuracy."
+        tip: "Allow the scale to warm up for 5\u201310 minutes after powering on before calibrating for best accuracy."
     },
     {
         title: "Clear & Power On",
@@ -285,8 +489,8 @@ const STEPS = [
         led: "2",
         text: [
             "Locate the MENU button on the indicator head (far right, red button labeled ZERO on some models).",
-            "Press and hold the MENU button for 3-5 seconds. The display will cycle through values.",
-            "When the display shows \"2\" you are in calibration mode. Release the button."
+            "Press and hold the MENU button for 3\u20135 seconds. The display will cycle through values.",
+            "When the display shows \u201c2\u201d you are in calibration mode. Release the button."
         ],
         warning: "Do not press any other buttons while entering calibration mode, or you may need to restart the process."
     },
@@ -295,29 +499,29 @@ const STEPS = [
         image: "images/step2_p_zero.jpg",
         led: "P 0.000",
         text: [
-            "The display should now show \"P 0.000\" — this indicates the zero point reference.",
+            "The display should now show \u201cP 0.000\u201d \u2014 this indicates the zero point reference.",
             "The platform must be completely empty with nothing on it.",
             "Confirm this is the zero reading. If correct, press the confirmation button to proceed to the next step."
         ],
-        tip: "\"P\" stands for the calibration point. P 0.000 means the scale is recording its empty/zero reference weight."
+        tip: "\u201cP\u201d stands for the calibration point. P 0.000 means the scale is recording its empty/zero reference weight."
     },
     {
         title: "Set Full Capacity",
         image: "images/step4_capacity_100.jpg",
         led: "100.000",
         text: [
-            "The display will briefly show \"FULL\" indicating full capacity mode.",
-            "Then it will display your scale's maximum capacity rating — in this case \"100.000\" (100 lbs).",
-            "This tells the scale the maximum weight it should expect. Verify this matches your scale's rated capacity."
+            "The display will briefly show \u201cFULL\u201d indicating full capacity mode.",
+            "Then it will display your scale\u2019s maximum capacity rating \u2014 in this case \u201c100.000\u201d (100 lbs).",
+            "This tells the scale the maximum weight it should expect. Verify this matches your scale\u2019s rated capacity."
         ],
-        tip: "If the capacity shown doesn't match your scale's specs, consult your scale manual to adjust the setting."
+        tip: "If the capacity shown doesn\u2019t match your scale\u2019s specs, consult your scale manual to adjust the setting."
     },
     {
         title: "Add Calibration Weight",
         image: "images/step5_adload.jpg",
         led: "AdLoAd",
         text: [
-            "The display now shows \"AdLoAd\" — this is the scale asking you to place your calibration weight.",
+            "The display now shows \u201cAdLoAd\u201d \u2014 this is the scale asking you to place your calibration weight.",
             "Carefully place your known-weight calibration items onto the CENTER of the platform.",
             "You may add multiple weights to reach your calibration target. Place them evenly on the platform."
         ],
@@ -341,19 +545,19 @@ const STEPS = [
         text: [
             "Once the reading has stabilized, press the confirmation button (COUNT or FUNC) to lock in the calibration.",
             "The scale processes the calibration data and stores it in memory.",
-            "The display will show \"End\" — this means calibration is complete and saved successfully."
+            "The display will show \u201cEnd\u201d \u2014 this means calibration is complete and saved successfully."
         ]
     },
     {
-        title: "Verify Calibration Accuracy",
+        title: "Verify Accuracy",
         image: "images/step8_verify_zero.jpg",
         led: "0.000",
         text: [
-            "Remove all calibration weights from the platform. The display should return to \"0.000\" or \"0.005\" (within tolerance).",
+            "Remove all calibration weights from the platform. The display should return to \u201c0.000\u201d or \u201c0.005\u201d (within tolerance).",
             "Place the known weights back on the scale to verify it reads the correct value.",
             "If the reading is off by more than your acceptable tolerance, repeat the calibration process from Step 2."
         ],
-        tip: "A good practice is to test with 2-3 different known weights to confirm accuracy across the range."
+        tip: "A good practice is to test with 2\u20133 different known weights to confirm accuracy across the range."
     },
     {
         title: "Troubleshooting",
@@ -364,12 +568,12 @@ const STEPS = [
             "If you run into issues during calibration, check these common problems and solutions."
         ],
         troubles: [
-            { title: "Display won't enter calibration mode", text: "Try holding the MENU/ZERO button longer (5-8 seconds). Some models require a specific button sequence." },
+            { title: "Display won\u2019t enter calibration mode", text: "Try holding the MENU/ZERO button longer (5\u20138 seconds). Some models require a specific button sequence." },
             { title: "Display shows error code", text: "Power cycle the scale (off for 10 seconds, then back on). Allow it to warm up before retrying." },
-            { title: "Reading won't stabilize", text: "Check for drafts, vibrations, or an uneven surface. Ensure nothing is touching the platform edges." },
-            { title: "Calibration weight doesn't match display", text: "Verify your weights are certified. Even small inaccuracies in calibration weights will carry through." },
-            { title: "Display shows \"Err\" after confirm", text: "The weight placed may be too far from the expected value. Check that you're using the correct calibration weight for your scale's capacity." },
-            { title: "Scale drifts after calibration", text: "Allow 15-30 minutes warm-up time. Temperature changes can cause drift. Recalibrate if the environment changed significantly." }
+            { title: "Reading won\u2019t stabilize", text: "Check for drafts, vibrations, or an uneven surface. Ensure nothing is touching the platform edges." },
+            { title: "Weight doesn\u2019t match display", text: "Verify your weights are certified. Even small inaccuracies in calibration weights will carry through." },
+            { title: "Display shows \u201cErr\u201d after confirm", text: "The weight placed may be too far from the expected value. Check that you\u2019re using the correct calibration weight for your scale\u2019s capacity." },
+            { title: "Scale drifts after calibration", text: "Allow 15\u201330 minutes warm-up time. Temperature changes can cause drift. Recalibrate if the environment changed significantly." }
         ]
     }
 ];
@@ -379,6 +583,8 @@ const STEPS = [
    ===================================================================== */
 
 let currentStep = 0;
+let autoplayInterval = null;
+let autoplayCountdown = 0;
 
 function renderNav() {
     const nav = document.getElementById('stepNav');
@@ -390,6 +596,7 @@ function renderNav() {
 function renderStep(index) {
     const step = STEPS[index];
     const container = document.getElementById('stepContainer');
+
     let html = `<div class="step-card active">`;
 
     // Badge
@@ -404,7 +611,7 @@ function renderStep(index) {
     // Content area
     html += `<div class="step-content">`;
 
-    // Image (if present)
+    // Image
     if (step.image) {
         html += `<div class="step-image-wrap">
             <img src="${step.image}" alt="${step.title}" loading="lazy">
@@ -416,7 +623,7 @@ function renderStep(index) {
 
     // LED display
     if (step.led) {
-        html += `<div class="led-display"><span class="led-text">${step.led}</span></div>`;
+        html += `<div class="led-display"><span class="led-text" id="ledText"></span></div>`;
     }
 
     // Paragraphs
@@ -424,7 +631,7 @@ function renderStep(index) {
         html += `<p>${p}</p>`;
     }
 
-    // Checklist (intro)
+    // Checklist
     if (step.checklist) {
         html += `<ul class="checklist">`;
         for (const item of step.checklist) {
@@ -443,8 +650,7 @@ function renderStep(index) {
         html += `<div class="warning-box"><strong>Caution:</strong> ${step.warning}</div>`;
     }
 
-    html += `</div>`; // end step-text
-    html += `</div>`; // end step-content
+    html += `</div></div>`; // end step-text, step-content
 
     // Troubleshooting grid
     if (step.troubles) {
@@ -458,6 +664,11 @@ function renderStep(index) {
     html += `</div>`; // end step-card
     container.innerHTML = html;
 
+    // Animate LED text typing effect
+    if (step.led) {
+        animateLED(step.led);
+    }
+
     // Update nav dots
     document.querySelectorAll('.step-dot').forEach((dot, i) => {
         dot.className = 'step-dot';
@@ -465,8 +676,14 @@ function renderStep(index) {
         if (i === index) dot.classList.add('active');
     });
 
+    // Scroll active dot into view on mobile
+    const activeDot = document.querySelector('.step-dot.active');
+    if (activeDot) {
+        activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+
     // Update progress bar
-    const pct = ((index) / (STEPS.length - 1)) * 100;
+    const pct = (index / (STEPS.length - 1)) * 100;
     document.getElementById('progressBar').style.width = pct + '%';
 
     // Update counter
@@ -475,7 +692,26 @@ function renderStep(index) {
     // Update buttons
     document.getElementById('prevBtn').disabled = (index === 0);
     document.getElementById('nextBtn').disabled = (index === STEPS.length - 1);
-    document.getElementById('nextBtn').textContent = (index === STEPS.length - 2) ? 'Finish' : 'Next \u2192';
+    document.getElementById('nextBtn').textContent = (index === STEPS.length - 2) ? 'Finish \u2713' : 'Next \u2192';
+
+    // Scroll to top of content
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* LED typing animation */
+function animateLED(text) {
+    const el = document.getElementById('ledText');
+    if (!el) return;
+    el.textContent = '';
+    let i = 0;
+    const interval = setInterval(() => {
+        if (i < text.length) {
+            el.textContent += text[i];
+            i++;
+        } else {
+            clearInterval(interval);
+        }
+    }, 80);
 }
 
 function goToStep(index) {
@@ -487,13 +723,60 @@ function goToStep(index) {
 function nextStep() { goToStep(currentStep + 1); }
 function prevStep() { goToStep(currentStep - 1); }
 
-// Keyboard navigation
+/* Autoplay */
+function toggleAutoplay() {
+    const btn = document.getElementById('autoplayBtn');
+    const timer = document.getElementById('autoplayTimer');
+    if (autoplayInterval) {
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+        btn.classList.remove('active');
+        btn.textContent = 'Autoplay';
+        timer.textContent = '';
+    } else {
+        btn.classList.add('active');
+        btn.textContent = 'Stop';
+        autoplayCountdown = 5;
+        timer.textContent = autoplayCountdown + 's';
+        autoplayInterval = setInterval(() => {
+            autoplayCountdown--;
+            timer.textContent = autoplayCountdown + 's';
+            if (autoplayCountdown <= 0) {
+                if (currentStep < STEPS.length - 1) {
+                    nextStep();
+                    autoplayCountdown = 5;
+                } else {
+                    toggleAutoplay(); // stop at end
+                }
+            }
+        }, 1000);
+    }
+}
+
+/* Keyboard navigation */
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') nextStep();
-    if (e.key === 'ArrowLeft') prevStep();
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
 });
 
-// Initialize
+/* Touch swipe support */
+let touchStartX = 0;
+let touchStartY = 0;
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    const dy = e.changedTouches[0].screenY - touchStartY;
+    // Only trigger if horizontal swipe is dominant and > 60px
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0) nextStep();
+        else prevStep();
+    }
+}, { passive: true });
+
+/* Initialize */
 renderNav();
 renderStep(0);
 </script>
