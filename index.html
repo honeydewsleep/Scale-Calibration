@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Platform Scale Calibration Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-bar {
+            position: fixed; top: 0; left: 0; height: 4px; z-index: 100;
+            background: linear-gradient(90deg, #00BCD4, #00E5FF);
+            transition: width 0.4s ease;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            text-align: center;
+            padding: 2rem 1rem 1rem;
+            border-bottom: 1px solid rgba(0,188,212,0.2);
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00BCD4, #00E5FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p { color: #888; font-size: 0.9rem; margin-top: 0.3rem; }
+
+        /* ===== STEP NAV DOTS ===== */
+        .step-nav {
+            display: flex; justify-content: center; gap: 0.5rem;
+            padding: 1rem; flex-wrap: wrap;
+        }
+        .step-dot {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .step-dot:hover { border-color: #00BCD4; background: rgba(0,188,212,0.1); }
+        .step-dot.active {
+            background: #00BCD4; border-color: #00BCD4; color: #0f0f23;
+        }
+        .step-dot.completed {
+            background: rgba(0,188,212,0.25); border-color: #00BCD4; color: #00E5FF;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .step-container {
+            max-width: 900px; margin: 0 auto; padding: 1rem;
+            min-height: 60vh;
+        }
+
+        .step-card {
+            display: none; animation: fadeSlideIn 0.4s ease;
+        }
+        .step-card.active { display: block; }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Step number badge */
+        .step-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .step-number {
+            background: #00BCD4; color: #0f0f23;
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; font-weight: 700;
+        }
+        .step-label { color: #00BCD4; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        .step-title {
+            font-size: 1.8rem; font-weight: 700; color: #fff;
+            margin-bottom: 1.2rem;
+        }
+
+        /* Layout: image + text side by side on desktop */
+        .step-content {
+            display: flex; gap: 1.5rem; align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .step-image-wrap {
+            flex: 0 0 340px; max-width: 100%;
+        }
+        .step-image-wrap img {
+            width: 100%; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            /* KEY: object-fit ensures images display naturally without stretching */
+            object-fit: contain;
+            background: #111;
+        }
+        .step-text {
+            flex: 1; min-width: 250px;
+        }
+        .step-text p {
+            font-size: 1rem; line-height: 1.7; color: #ccc; margin-bottom: 1rem;
+        }
+
+        /* ===== LED DISPLAY ===== */
+        .led-display {
+            background: #111; border: 2px solid #333; border-radius: 8px;
+            padding: 0.6rem 1.2rem; display: inline-block;
+            margin: 0.8rem 0;
+        }
+        .led-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.6rem; font-weight: 600;
+            color: #FF3333;
+            text-shadow: 0 0 8px rgba(255,51,51,0.6), 0 0 20px rgba(255,51,51,0.3);
+            letter-spacing: 0.15em;
+            animation: ledPulse 2s ease-in-out infinite;
+        }
+        @keyframes ledPulse {
+            0%, 100% { text-shadow: 0 0 8px rgba(255,51,51,0.6), 0 0 20px rgba(255,51,51,0.3); }
+            50% { text-shadow: 0 0 12px rgba(255,51,51,0.8), 0 0 30px rgba(255,51,51,0.5); }
+        }
+
+        /* ===== TIP BOX ===== */
+        .tip-box {
+            background: rgba(0,188,212,0.08);
+            border-left: 3px solid #00BCD4;
+            border-radius: 0 8px 8px 0;
+            padding: 0.8rem 1rem; margin-top: 0.5rem;
+            font-size: 0.9rem; color: #aaa;
+        }
+        .tip-box strong { color: #00BCD4; }
+
+        /* ===== WARNING BOX ===== */
+        .warning-box {
+            background: rgba(255,152,0,0.08);
+            border-left: 3px solid #FF9800;
+            border-radius: 0 8px 8px 0;
+            padding: 0.8rem 1rem; margin-top: 0.5rem;
+            font-size: 0.9rem; color: #aaa;
+        }
+        .warning-box strong { color: #FF9800; }
+
+        /* ===== NAV BUTTONS ===== */
+        .nav-buttons {
+            display: flex; justify-content: space-between; align-items: center;
+            max-width: 900px; margin: 2rem auto; padding: 0 1rem 2rem;
+        }
+        .nav-btn {
+            background: rgba(0,188,212,0.15); border: 1px solid rgba(0,188,212,0.3);
+            color: #00BCD4; padding: 0.7rem 1.5rem; border-radius: 8px;
+            font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-btn:hover { background: #00BCD4; color: #0f0f23; }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .nav-btn:disabled:hover { background: rgba(0,188,212,0.15); color: #00BCD4; }
+
+        .step-counter { color: #666; font-size: 0.85rem; }
+
+        /* ===== CHECKLIST (for intro step) ===== */
+        .checklist { list-style: none; padding: 0; }
+        .checklist li {
+            padding: 0.5rem 0; padding-left: 1.8rem; position: relative;
+            font-size: 0.95rem; color: #ccc;
+        }
+        .checklist li::before {
+            content: "\2713"; position: absolute; left: 0;
+            color: #00BCD4; font-weight: 700;
+        }
+
+        /* ===== TROUBLESHOOTING ===== */
+        .troubleshoot-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem; margin-top: 1rem;
+        }
+        .troubleshoot-item {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px; padding: 1rem;
+        }
+        .troubleshoot-item h4 { color: #FF9800; font-size: 0.9rem; margin-bottom: 0.4rem; }
+        .troubleshoot-item p { font-size: 0.85rem; color: #999; line-height: 1.5; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 700px) {
+            .step-image-wrap { flex: 0 0 100%; }
+            .step-title { font-size: 1.4rem; }
+            .step-content { flex-direction: column; }
+        }
+
+        /* ===== KEYBOARD HINT ===== */
+        .keyboard-hint {
+            text-align: center; padding: 0.5rem; color: #444; font-size: 0.75rem;
+        }
+        kbd {
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 4px; padding: 0.1rem 0.4rem; font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="header">
+    <h1>Scale Calibration Guide</h1>
+    <p>Honeydew Sleep &mdash; Warehouse Operations</p>
+</div>
+
+<div class="step-nav" id="stepNav"></div>
+
+<div class="step-container" id="stepContainer"></div>
+
+<div class="nav-buttons">
+    <button class="nav-btn" id="prevBtn" onclick="prevStep()">&larr; Previous</button>
+    <span class="step-counter" id="stepCounter"></span>
+    <button class="nav-btn" id="nextBtn" onclick="nextStep()">Next &rarr;</button>
+</div>
+
+<div class="keyboard-hint">
+    Navigate: <kbd>&larr;</kbd> <kbd>&rarr;</kbd> arrow keys
+</div>
+
+<script>
+/* =====================================================================
+   EDIT YOUR STEPS HERE
+   =====================================================================
+   Each step object has:
+     - title:    The heading for this step
+     - image:    Path to the image file (relative to this HTML file)
+                 To swap an image, just replace the file in /images/ and
+                 update this path, OR keep the same filename.
+     - led:      What the LED display reads (set to "" to hide the LED)
+     - text:     Array of paragraph strings (each becomes a <p> tag)
+     - tip:      (optional) A tip shown in a teal box
+     - warning:  (optional) A warning shown in an orange box
+     - type:     (optional) "intro", "troubleshoot", or "finale" for
+                 special formatting. Leave blank for normal steps.
+     - checklist:(optional) Array of strings for a checklist (intro step)
+     - troubles: (optional) Array of {title, text} for troubleshoot step
+   ===================================================================== */
+
+const STEPS = [
+    {
+        title: "What You'll Need",
+        image: "images/step0_power_on.jpg",
+        led: "",
+        type: "intro",
+        text: [
+            "Before you begin calibrating, gather the following items and ensure your workspace is ready."
+        ],
+        checklist: [
+            "Industrial platform scale (powered off)",
+            "Known calibration weights (certified/verified)",
+            "Clear, level workspace",
+            "15-20 minutes of uninterrupted time",
+            "Stable, vibration-free environment"
+        ],
+        tip: "Allow the scale to warm up for 5-10 minutes after powering on before calibrating for best accuracy."
+    },
+    {
+        title: "Clear & Power On",
+        image: "images/step0_power_on.jpg",
+        led: "0.000",
+        text: [
+            "Ensure the platform is completely clear of any items or debris.",
+            "Press the power button to turn on the scale. The digital display will illuminate and show initial values.",
+            "Verify the scale is sitting level on a stable, vibration-free surface."
+        ],
+        tip: "If the display shows erratic numbers at startup, wait a moment for it to stabilize before proceeding."
+    },
+    {
+        title: "Enter Calibration Mode",
+        image: "images/step1_press_buttons.jpg",
+        led: "2",
+        text: [
+            "Locate the MENU button on the indicator head (far right, red button labeled ZERO on some models).",
+            "Press and hold the MENU button for 3-5 seconds. The display will cycle through values.",
+            "When the display shows \"2\" you are in calibration mode. Release the button."
+        ],
+        warning: "Do not press any other buttons while entering calibration mode, or you may need to restart the process."
+    },
+    {
+        title: "Zero Point Calibration",
+        image: "images/step2_p_zero.jpg",
+        led: "P 0.000",
+        text: [
+            "The display should now show \"P 0.000\" — this indicates the zero point reference.",
+            "The platform must be completely empty with nothing on it.",
+            "Confirm this is the zero reading. If correct, press the confirmation button to proceed to the next step."
+        ],
+        tip: "\"P\" stands for the calibration point. P 0.000 means the scale is recording its empty/zero reference weight."
+    },
+    {
+        title: "Set Full Capacity",
+        image: "images/step4_capacity_100.jpg",
+        led: "100.000",
+        text: [
+            "The display will briefly show \"FULL\" indicating full capacity mode.",
+            "Then it will display your scale's maximum capacity rating — in this case \"100.000\" (100 lbs).",
+            "This tells the scale the maximum weight it should expect. Verify this matches your scale's rated capacity."
+        ],
+        tip: "If the capacity shown doesn't match your scale's specs, consult your scale manual to adjust the setting."
+    },
+    {
+        title: "Add Calibration Weight",
+        image: "images/step5_adload.jpg",
+        led: "AdLoAd",
+        text: [
+            "The display now shows \"AdLoAd\" — this is the scale asking you to place your calibration weight.",
+            "Carefully place your known-weight calibration items onto the CENTER of the platform.",
+            "You may add multiple weights to reach your calibration target. Place them evenly on the platform."
+        ],
+        warning: "Place weights gently and centered. Off-center loading can affect calibration accuracy."
+    },
+    {
+        title: "Place Weights & Read Display",
+        image: "images/step6_weights_on_scale.jpg",
+        led: "",
+        text: [
+            "With the calibration weights on the platform, the display will begin reading and showing the weight value.",
+            "Wait for the reading to stabilize completely before confirming.",
+            "The display should closely match the known weight of your calibration items."
+        ],
+        tip: "If the reading fluctuates, ensure there are no drafts, vibrations, or movement near the scale."
+    },
+    {
+        title: "Confirm & Complete",
+        image: "images/step7_end_display.jpg",
+        led: "End",
+        text: [
+            "Once the reading has stabilized, press the confirmation button (COUNT or FUNC) to lock in the calibration.",
+            "The scale processes the calibration data and stores it in memory.",
+            "The display will show \"End\" — this means calibration is complete and saved successfully."
+        ]
+    },
+    {
+        title: "Verify Calibration Accuracy",
+        image: "images/step8_verify_zero.jpg",
+        led: "0.000",
+        text: [
+            "Remove all calibration weights from the platform. The display should return to \"0.000\" or \"0.005\" (within tolerance).",
+            "Place the known weights back on the scale to verify it reads the correct value.",
+            "If the reading is off by more than your acceptable tolerance, repeat the calibration process from Step 2."
+        ],
+        tip: "A good practice is to test with 2-3 different known weights to confirm accuracy across the range."
+    },
+    {
+        title: "Troubleshooting",
+        image: "",
+        led: "",
+        type: "troubleshoot",
+        text: [
+            "If you run into issues during calibration, check these common problems and solutions."
+        ],
+        troubles: [
+            { title: "Display won't enter calibration mode", text: "Try holding the MENU/ZERO button longer (5-8 seconds). Some models require a specific button sequence." },
+            { title: "Display shows error code", text: "Power cycle the scale (off for 10 seconds, then back on). Allow it to warm up before retrying." },
+            { title: "Reading won't stabilize", text: "Check for drafts, vibrations, or an uneven surface. Ensure nothing is touching the platform edges." },
+            { title: "Calibration weight doesn't match display", text: "Verify your weights are certified. Even small inaccuracies in calibration weights will carry through." },
+            { title: "Display shows \"Err\" after confirm", text: "The weight placed may be too far from the expected value. Check that you're using the correct calibration weight for your scale's capacity." },
+            { title: "Scale drifts after calibration", text: "Allow 15-30 minutes warm-up time. Temperature changes can cause drift. Recalibrate if the environment changed significantly." }
+        ]
+    }
+];
+
+/* =====================================================================
+   APPLICATION CODE (you probably don't need to edit below this line)
+   ===================================================================== */
+
+let currentStep = 0;
+
+function renderNav() {
+    const nav = document.getElementById('stepNav');
+    nav.innerHTML = STEPS.map((s, i) =>
+        `<div class="step-dot" data-step="${i}" onclick="goToStep(${i})">${i}</div>`
+    ).join('');
+}
+
+function renderStep(index) {
+    const step = STEPS[index];
+    const container = document.getElementById('stepContainer');
+    let html = `<div class="step-card active">`;
+
+    // Badge
+    html += `<div class="step-badge">
+        <div class="step-number">${index}</div>
+        <div class="step-label">Step ${index} of ${STEPS.length - 1}</div>
+    </div>`;
+
+    // Title
+    html += `<h2 class="step-title">${step.title}</h2>`;
+
+    // Content area
+    html += `<div class="step-content">`;
+
+    // Image (if present)
+    if (step.image) {
+        html += `<div class="step-image-wrap">
+            <img src="${step.image}" alt="${step.title}" loading="lazy">
+        </div>`;
+    }
+
+    // Text column
+    html += `<div class="step-text">`;
+
+    // LED display
+    if (step.led) {
+        html += `<div class="led-display"><span class="led-text">${step.led}</span></div>`;
+    }
+
+    // Paragraphs
+    for (const p of step.text) {
+        html += `<p>${p}</p>`;
+    }
+
+    // Checklist (intro)
+    if (step.checklist) {
+        html += `<ul class="checklist">`;
+        for (const item of step.checklist) {
+            html += `<li>${item}</li>`;
+        }
+        html += `</ul>`;
+    }
+
+    // Tip
+    if (step.tip) {
+        html += `<div class="tip-box"><strong>Tip:</strong> ${step.tip}</div>`;
+    }
+
+    // Warning
+    if (step.warning) {
+        html += `<div class="warning-box"><strong>Caution:</strong> ${step.warning}</div>`;
+    }
+
+    html += `</div>`; // end step-text
+    html += `</div>`; // end step-content
+
+    // Troubleshooting grid
+    if (step.troubles) {
+        html += `<div class="troubleshoot-grid">`;
+        for (const t of step.troubles) {
+            html += `<div class="troubleshoot-item"><h4>${t.title}</h4><p>${t.text}</p></div>`;
+        }
+        html += `</div>`;
+    }
+
+    html += `</div>`; // end step-card
+    container.innerHTML = html;
+
+    // Update nav dots
+    document.querySelectorAll('.step-dot').forEach((dot, i) => {
+        dot.className = 'step-dot';
+        if (i < index) dot.classList.add('completed');
+        if (i === index) dot.classList.add('active');
+    });
+
+    // Update progress bar
+    const pct = ((index) / (STEPS.length - 1)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+
+    // Update counter
+    document.getElementById('stepCounter').textContent = `${index + 1} / ${STEPS.length}`;
+
+    // Update buttons
+    document.getElementById('prevBtn').disabled = (index === 0);
+    document.getElementById('nextBtn').disabled = (index === STEPS.length - 1);
+    document.getElementById('nextBtn').textContent = (index === STEPS.length - 2) ? 'Finish' : 'Next \u2192';
+}
+
+function goToStep(index) {
+    if (index >= 0 && index < STEPS.length) {
+        currentStep = index;
+        renderStep(currentStep);
+    }
+}
+function nextStep() { goToStep(currentStep + 1); }
+function prevStep() { goToStep(currentStep - 1); }
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') nextStep();
+    if (e.key === 'ArrowLeft') prevStep();
+});
+
+// Initialize
+renderNav();
+renderStep(0);
+</script>
+
+</body>
+</html>
