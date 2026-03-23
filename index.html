@@ -470,94 +470,112 @@ const STEPS = [
             "15\u201320 minutes of uninterrupted time",
             "Stable, vibration-free environment"
         ],
-        tip: "Allow the scale to warm up for 5\u201310 minutes after powering on before calibrating for best accuracy."
     },
     {
         title: "Clear & Power On",
         image: "images/step0_power_on.jpg",
-        led: "0.000",
+        led: "d   2",
         text: [
             "Ensure the platform is completely clear of any items or debris.",
-            "Press the power button to turn on the scale. The digital display will illuminate and show initial values.",
-            "Verify the scale is sitting level on a stable, vibration-free surface."
+            "Press the power button to turn on the scale. Press the Pound (#) button as you flip the scale on.",
+            "The scale should now display D   2.",
+            "Press the # button again."
         ],
-        tip: "If the display shows erratic numbers at startup, wait a moment for it to stabilize before proceeding."
+        tip: "Allow the scale to warm up for 5\u201310 minutes after powering on before calibrating for best accuracy."
     },
     {
-        title: "Enter Calibration Mode",
-        image: "images/step1_press_buttons.jpg",
-        led: "2",
-        text: [
-            "Locate the MENU button on the indicator head (far right, red button labeled ZERO on some models).",
-            "Press and hold the MENU button for 3\u20135 seconds. The display will cycle through values.",
-            "When the display shows \u201c2\u201d you are in calibration mode. Release the button."
-        ],
-        warning: "Do not press any other buttons while entering calibration mode, or you may need to restart the process."
-    },
-    {
-        title: "Zero Point Calibration",
+        title: "Enter Decimal Mode",
         image: "images/step2_p_zero.jpg",
         led: "P 0.000",
         text: [
-            "The display should now show \u201cP 0.000\u201d \u2014 this indicates the zero point reference.",
-            "The platform must be completely empty with nothing on it.",
-            "Confirm this is the zero reading. If correct, press the confirmation button to proceed to the next step."
+            "The display should now show \u201cP 0.000\u201d \u2014 This is 3 decimal places.",
+            "From here you can change the decimal point's location, or continue.",
+            "Press # to continue."
         ],
         tip: "\u201cP\u201d stands for the calibration point. P 0.000 means the scale is recording its empty/zero reference weight."
+    },
+    {
+        title: "FULL Weight",
+        image: "images/step3_full_display.jpg",
+        led: "FULL",
+        text: [
+            "The display should now show \u201cFULL\u201d.",
+            "Press the orange \u201cTARE\u201d button.",
+        ],
     },
     {
         title: "Set Full Capacity",
         image: "images/step4_capacity_100.jpg",
         led: "100.000",
         text: [
-            "The display will briefly show \u201cFULL\u201d indicating full capacity mode.",
-            "Then it will display your scale\u2019s maximum capacity rating \u2014 in this case \u201c100.000\u201d (100 lbs).",
-            "This tells the scale the maximum weight it should expect. Verify this matches your scale\u2019s rated capacity."
+            "The display will now show \u201c100.000\u201d. This is the scales maximum capacity rating.",
+            "Press #.",
         ],
         tip: "If the capacity shown doesn\u2019t match your scale\u2019s specs, consult your scale manual to adjust the setting."
     },
     {
-        title: "Add Calibration Weight",
-        image: "images/step5_adload.jpg",
+        title: "noLoad weight",
+        image: "images/step5_noLoad.jpg",
+        led: "noLoAd",
+        text: [
+            "The display now shows \u201cnoLoAd\u201d \u2014 this is the scale asking you to remove anything present from the scale.",
+            "Make sure nothing is on the scale, then press #.",
+        ],
+    },
+    {
+        title: "Add weight",
+        image: "images/step6_weights_on_scale.jpg",
         led: "AdLoAd",
         text: [
-            "The display now shows \u201cAdLoAd\u201d \u2014 this is the scale asking you to place your calibration weight.",
-            "Carefully place your known-weight calibration items onto the CENTER of the platform.",
-            "You may add multiple weights to reach your calibration target. Place them evenly on the platform."
+            "Put your pre-weighed calibration weights onto the scale.",
+            "After adding your weights, press Tare.",
         ],
-        warning: "Place weights gently and centered. Off-center loading can affect calibration accuracy."
+        tip: "Make sure to not be leaning on the scale after pressing Tare."
     },
     {
-        title: "Place Weights & Read Display",
-        image: "images/step6_weights_on_scale.jpg",
-        led: "",
+        title: "Input your weight",
+        image: "images/step7_000.jpg",
+        led: "000.000",
         text: [
-            "With the calibration weights on the platform, the display will begin reading and showing the weight value.",
-            "Wait for the reading to stabilize completely before confirming.",
-            "The display should closely match the known weight of your calibration items."
+            "The Scale should now show 000.000, with a red LED under a number signifying which digit you are on.",
+            "We are now going to enter the calibration weight's weight (in kilograms) to the scale.",
+            "Press the Zero button to increment that digit's value, and press Tare to move onto the next digit.",
+            "When the weight on the screen matches the weight you've put on the scale, press #."
         ],
-        tip: "If the reading fluctuates, ensure there are no drafts, vibrations, or movement near the scale."
-    },
-    {
-        title: "Confirm & Complete",
-        image: "images/step7_end_display.jpg",
-        led: "End",
-        text: [
-            "Once the reading has stabilized, press the confirmation button (COUNT or FUNC) to lock in the calibration.",
-            "The scale processes the calibration data and stores it in memory.",
-            "The display will show \u201cEnd\u201d \u2014 this means calibration is complete and saved successfully."
-        ]
+        warning: "Make sure the weight you enter is converted to kilograms! Use google if you are unsure."
+
     },
     {
         title: "Verify Accuracy",
-        image: "images/step8_verify_zero.jpg",
-        led: "0.000",
+        image: "images/step8_calibrate_button.jpg",
+        led: "End",
         text: [
-            "Remove all calibration weights from the platform. The display should return to \u201c0.000\u201d or \u201c0.005\u201d (within tolerance).",
-            "Place the known weights back on the scale to verify it reads the correct value.",
-            "If the reading is off by more than your acceptable tolerance, repeat the calibration process from Step 2."
+            "The display should now show \u201cEnd\u201d",
+            "To save your calibration, goto the back side of the screen, unscrew the scale, and press the calibration button.",
+            "It is near the top left of the back side."
         ],
-        tip: "A good practice is to test with 2\u20133 different known weights to confirm accuracy across the range."
+        tip: "You'll need something thin to press the button on the back of the scale."
+    },
+    {
+        title: "Verify Weight Units",
+        image: "images/step9.jpg",
+        led: "P1    2",
+        text: [
+            "The scale should now be correctly calibrated.",
+            "To make sure your scale is measuring in pounds, press and hold the Func button for 5 seconds.",
+            "The scale should now show P1    2. The 2 means the scale is in pounds (correct).",
+            "If it says P1   1, press the TARE button to change it to 2.",
+            "Press the Func button to continue."
+        ],
+    },
+    {
+        title: "All done!",
+        image: "images/step8_verify_zero.jpg",
+        text: [
+            "From here on, you should be finished with setting up the scale!",
+            "You can verify by putting a calibration weight on the scale and ensuring it's correct.",
+            "If it is not correct, either try from step 1 or goto the troubleshooting page (next slide)."
+        ],
     },
     {
         title: "Troubleshooting",
